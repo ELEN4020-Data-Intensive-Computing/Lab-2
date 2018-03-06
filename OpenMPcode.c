@@ -1,7 +1,7 @@
-
 #include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 typedef int bool;
 #define true 1
@@ -22,8 +22,6 @@ int N = SquareSize;
 void Transpose(int **arraY, int SquareSize) {
 	int nthreads, tid, i, j, k, chunk=SquareSize, count, starterRow=0, starterCol=0;
 	int N = SquareSize;
- 	//int * a = arraY;
-	omp_set_num_threads(8);
 
 	double start = omp_get_wtime();
 		#pragma omp parallel shared(arraY,nthreads,chunk,starterRow,starterCol,i,j,k) private(tid) 
@@ -56,14 +54,17 @@ void Transpose(int **arraY, int SquareSize) {
 	double time  = omp_get_wtime() - start;
 	printf("Time in seconds = %f",time );	
 	printf("\n");
-	PrintTranspose(arraY,SquareSize);
+	//PrintTranspose(arraY,SquareSize);
 }
 
 int main(){
 
-	int **a;
 	int rows = 128;
 	int cols = 128;
+	for(int i = 0; i < 3; i++) {
+	printf("Matrix size = %d\n", rows);
+	int **a;
+	int threads = 4;
 	int i;
 	int temp = i + 1; 
 	a = malloc(rows * sizeof (int *));
@@ -81,7 +82,16 @@ int main(){
         }
     }
 
-	Transpose(a,rows);
+	for(int j = 0; j < 5; j++) {
+		omp_set_num_threads(threads);
+		Transpose(a,rows);
+		threads *=2;
+		if(threads/32 == 1)
+			threads *=2;
+	}
+	rows *=8;
+	cols *=8;
+}
 
 }
 
